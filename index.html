@@ -1,18 +1,48 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
     <head>
         <title>Web Socket Example</title>
         <meta charset="UTF-8">
         <script>
+         function handle_incoming(data) {
+             var newdiv = document.createElement("div");
+             newdiv.innerHTML = data;
+             newdiv.classList.add('line')
+             var console = document.getElementById('console');
+             console.appendChild(newdiv);
+         }
+
+         var reader = new FileReader();
+         reader.onload = function() {
+             handle_incoming(reader.result);
+         }
+
          window.onload = function() {
-             var s = new WebSocket("ws://localhost:9876/");
-             s.onopen = function(e) { alert("opened"); }
-             s.onclose = function(e) { alert("closed"); }
-             s.onmessage = function(e) { alert("got: " + e.data); }
+             var s = new WebSocket("ws://localhost:8001/");
+             s.onopen = function(e) { console.log("opened"); }
+             s.onclose = function(e) { console.log("closed"); }
+             s.onmessage = function(e) { reader.readAsText(e.data); }
          };
         </script>
+        <style>
+         body {
+             background-color: #000;
+             font-family: Consolas, Monaco, Courier;
+             color: #0f0;
+         }
+
+         .line {
+             margin: 0.5ex 0;
+         }
+
+         #console {
+             margin: 0 auto;
+             max-width: 800ex;
+             padding: 5%;
+         }
+        </style>
     </head>
     <body>
-        <div id="holder" style="width:600px; height:300px"></div>
+        <div id="console"></div>
     </body>
 </html>
