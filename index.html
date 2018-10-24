@@ -5,11 +5,15 @@
         <meta charset="UTF-8">
         <script>
          function handle_incoming(data) {
-             var newdiv = document.createElement("div");
-             newdiv.innerHTML = data;
-             newdiv.classList.add('line')
-             var console = document.getElementById('console');
-             console.appendChild(newdiv);
+             console.log(data);
+             datalines = data.replace(' ', '&nbsp;').split("\n");
+             for (lineindex in datalines) {
+               var newdiv = document.createElement("div");
+               newdiv.innerHTML = datalines[lineindex];
+               newdiv.classList.add('line');
+               var consoleDiv = document.getElementById('console');
+               consoleDiv.appendChild(newdiv);
+             }
          }
 
          var reader = new FileReader();
@@ -18,7 +22,7 @@
          }
 
          window.onload = function() {
-             var s = new WebSocket("ws://localhost:8001/");
+             var s = new WebSocket("ws://" + window.location.hostname + ":8001/");
              s.onopen = function(e) { console.log("opened"); }
              s.onclose = function(e) { console.log("closed"); }
              s.onmessage = function(e) { reader.readAsText(e.data); }
