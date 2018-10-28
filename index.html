@@ -5,7 +5,8 @@
         <meta charset="UTF-8">
         <script>
          function handle_incoming(data) {
-             console.log(data);
+             var regex = /([\x00-\x1F])/g;
+             console.log(regex.exec(data));
              datalines = data.replace(' ', '&nbsp;').split("\n");
              for (lineindex in datalines) {
                var newdiv = document.createElement("div");
