@@ -1,0 +1,23 @@
+{
+  "name": "pi-console",
+  "version": "1.0.0",
+  "description": "web front end for mirroring console",
+  "main": "main.py",
+  "dependencies": {},
+  "devDependencies": {
+    "mocha": "^5.2.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anuragpeshne/pi-console.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/anuragpeshne/pi-console/issues"
+  },
+  "homepage": "https://github.com/anuragpeshne/pi-console#readme"
+}
