@@ -1,5 +1,7 @@
 // referred: https://misc.flogisoft.com/bash/tip_colors_and_formatting
 
+const CONTROL_SEQ_256_LIST = require('./xtermcolors.json');
+
 const ESCAPE_CODES = {
     "\u0008": "backspace",
     "\u001b": "escape"
@@ -100,10 +102,10 @@ exports.parse_escape_code = function (input) {
     if (control_seq.length == 3) {
         if (control_seq[0] == 38 && control_seq[1] == 5) {
             // 256 colors foreground
-            return { "fg": control_seq[2] };
+            return { "fg": get_256_color_code(control_seq[2]) };
         } else if (control_seq[0] == 48 && control_seq[1] == 5) {
             // 256 colors background
-            return { "bg": control_seq[2] };
+            return { "bg": get_256_color_code(control_seq[2]) };
         }
     }
 
@@ -118,10 +120,33 @@ exports.parse_escape_code = function (input) {
             parsed_code = {};
         }
 
-        // https://stackoverflow.com/a/171256/1291435
-        // values are overwritten if keys match
-        return Object.assign(parsed_code_acc, parsed_code);
+        return merge_text_prop_obj(parsed_code_acc, parsed_code);
     }, {});
 
     return parsed_codes;
 };
+
+function get_256_color_code(input_colorId) {
+    if (input_colorId >= 0 && input_colorId <= 255) {
+        var color = CONTROL_SEQ_256_LIST.filter(function(color) {
+            return color['colorId'] == input_colorId;
+        });
+        return color[0]['hexString'];
+    } else {
+        return '#aaaaaa';
+    }
+}
+
+function merge_text_prop_obj(obj1, obj2) {
+    // this is a specific purpose object merge function
+    // if key is 'style' then keep both else keep obj2 property
+    var retObj = obj1;
+    for (key in obj2) {
+        if (key in obj1 && key == 'style') {
+            retObj['style'] = obj1['style'] + ', ' + obj2['style'];
+        } else {
+            retObj[key] = obj2[key];
+        }
+    }
+    return retObj;
+}

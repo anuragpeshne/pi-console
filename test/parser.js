@@ -5,11 +5,11 @@ describe('Parser', function() {
     describe('#parse_escape_code(input)', function() {
         it('it should parse 256 background color', function() {
             var parsed = parser.parse_escape_code("48;5;209");
-            assert.equal(parsed["bg"], 209);
+            assert.equal(parsed["bg"], '#ff875f');
         });
         it('it should parse 256 foreground color', function() {
             var parsed = parser.parse_escape_code("38;5;209");
-            assert.equal(parsed["fg"], 209);
+            assert.equal(parsed["fg"], '#ff875f');
         });
         it('it should reset', function() {
             var parsed = parser.parse_escape_code("0");
