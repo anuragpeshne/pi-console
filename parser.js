@@ -67,8 +67,10 @@ function parse_8_16_control_seq(code) {
 }
 
 exports.parse_console_input = function (input, pos) {
-    var b = (typeof(pos) !== 'undefined') ? pos : 1;
+    var pos = (typeof(pos) !== 'undefined') ? pos : 0;
     var output = [];
+    var current_style = {};
+    var buffer = '';
     while (pos < input.length) {
         var char = input[pos];
         if (char in ESCAPE_CODES) {
@@ -84,7 +86,10 @@ exports.parse_console_input = function (input, pos) {
                             escape_chars_end++;
                         }
                         if (escape_chars_end < input.length) {
-                            parse_escape_code(input.substring(pos, escape_chars_end));
+                            var parsed_style = parse_escape_code(input.substring(pos, escape_chars_end));
+                            output.push({ "value": buffer, "style": current_style });
+                            buffer = '';
+                            current_style = parsed_style;
                         }
                     }
                 }
@@ -92,9 +97,16 @@ exports.parse_console_input = function (input, pos) {
             case "backspace":
                 output.pop();
                 break;
+            default:
+                console.log("Unimplemented escape code:" + char);
             }
         }
+        // `concat` over `join`: https://stackoverflow.com/a/27126355/1291435
+        buffer += char;
+        pos++;
     }
+    output.push({ "value": buffer, "style": current_style });
+    return output;
 };
 
 exports.parse_escape_code = function (input) {

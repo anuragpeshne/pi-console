@@ -3,29 +3,49 @@ var parser = require('../parser.js');
 var assert = require('assert');
 describe('Parser', function() {
     describe('#parse_escape_code(input)', function() {
-        it('it should parse 256 background color', function() {
+        it('should parse 256 background color', function() {
             var parsed = parser.parse_escape_code("48;5;209");
             assert.equal(parsed["bg"], '#ff875f');
         });
-        it('it should parse 256 foreground color', function() {
+        it('should parse 256 foreground color', function() {
             var parsed = parser.parse_escape_code("38;5;209");
             assert.equal(parsed["fg"], '#ff875f');
         });
-        it('it should reset', function() {
+        it('should reset', function() {
             var parsed = parser.parse_escape_code("0");
             // https://stackoverflow.com/a/32108184/1291435
             assert.equal(Object.keys(parsed).length, 0);
             assert.equal(parsed.constructor, Object);
         });
-        it('it should parse bold and underline', function() {
+        it('should parse bold and underline', function() {
             var parsed = parser.parse_escape_code("1;4");
             assert.equal(parsed["style"], "bold, underline");
         });
-        it('it should parse Bold + Red forground + Green background ', function() {
+        it('should parse Bold + Red forground + Green background ', function() {
             var parsed = parser.parse_escape_code("1;31;42");
             assert.equal(parsed["style"], "bold");
             assert.equal(parsed["fg"], "red");
             assert.equal(parsed["bg"], "green");
+        });
+    });
+
+    describe('#parse_console_input(input, pos)', function() {
+        var ESC = 0x001b;
+        it('should parse simple single line', function() {
+            var input_str = "hello world";
+            var parsed = parser.parse_console_input(input_str);
+            var part1 = parsed[0].value;
+            assert.equal(part1, input_str);
+        });
+        it('should parse single line with escape sequence', function() {
+            var input_1 = "hello";
+            var input_2 = "world";
+            var input_str = ESC + "[31m" + input_1 + ESC + "[0m world";
+            var parsed = parser.parse_console_input(input_str);
+            console.log(parsed);
+            var part1 = parsed[0].value;
+            assert.equal(part1, input_1);
+            assert.equal(parsed[0].style.fg, "red");
         });
     });
 });
