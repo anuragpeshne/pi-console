@@ -13,7 +13,7 @@ describe('Parser', function() {
         });
         it('should reset', function() {
             var parsed = parser.parse_escape_code("0");
-            // https://stackoverflow.com/a/32108184/1291435
+            // Object Empty https://stackoverflow.com/a/32108184/1291435
             assert.equal(Object.keys(parsed).length, 0);
             assert.equal(parsed.constructor, Object);
         });
@@ -30,7 +30,7 @@ describe('Parser', function() {
     });
 
     describe('#parse_console_input(input, pos)', function() {
-        var ESC = 0x001b;
+        var ESC = "\u001b";
         it('should parse simple single line', function() {
             var input_str = "hello world";
             var parsed = parser.parse_console_input(input_str);
@@ -39,13 +39,33 @@ describe('Parser', function() {
         });
         it('should parse single line with escape sequence', function() {
             var input_1 = "hello";
-            var input_2 = "world";
-            var input_str = ESC + "[31m" + input_1 + ESC + "[0m world";
+            var input_2 = " world";
+            var input_str = ESC + "[31m" + input_1 + ESC + "[0m" + input_2;
             var parsed = parser.parse_console_input(input_str);
-            console.log(parsed);
-            var part1 = parsed[0].value;
-            assert.equal(part1, input_1);
-            assert.equal(parsed[0].style.fg, "red");
+
+            assert.equal(parsed.length, 2);
+
+            var part1 = parsed[0];
+            assert.equal(part1.value, input_1);
+            assert.equal(part1.style.fg, "red");
+
+            var part2 = parsed[1];
+            assert.equal(part2.value, input_2);
+            assert.equal(Object.keys(part2.style).length, 0);
+            assert.equal(part2.style.constructor, Object);
+        });
+
+        it('should parse single line without reseting control sequence', function() {
+            var input_1 = "hello";
+            var input_2 = " world";
+            var input_str = ESC + "[31m" + input_1 + input_2;
+            var parsed = parser.parse_console_input(input_str);
+
+            assert.equal(parsed.length, 1);
+
+            var part1 = parsed[0];
+            assert.equal(part1.value, input_1 + input_2);
+            assert.equal(part1.style.fg, "red");
         });
     });
 });

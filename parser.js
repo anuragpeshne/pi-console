@@ -72,24 +72,25 @@ exports.parse_console_input = function (input, pos) {
     var current_style = {};
     var buffer = '';
     while (pos < input.length) {
-        var char = input[pos];
-        if (char in ESCAPE_CODES) {
-            switch (ESCAPE_CODES[char]) {
+        if (input[pos] in ESCAPE_CODES) {
+            switch (ESCAPE_CODES[input[pos]]) {
             case "escape":
                 // check next character
                 if ((pos + 1) < input.length) {
-                    if ((pos + 1) == '[') {
+                    if (input[pos + 1] == '[') {
                         pos += 2; // we have parsed until '['
-                        var escape_chars = [];
                         var escape_chars_end = pos;
                         while (escape_chars_end < input.length && input[escape_chars_end] != 'm') {
                             escape_chars_end++;
                         }
                         if (escape_chars_end < input.length) {
-                            var parsed_style = parse_escape_code(input.substring(pos, escape_chars_end));
-                            output.push({ "value": buffer, "style": current_style });
-                            buffer = '';
+                            var parsed_style = exports.parse_escape_code(input.substring(pos, escape_chars_end));
+                            if (buffer.length > 0) {
+                                output.push({ "value": buffer, "style": current_style });
+                                buffer = '';
+                            }
                             current_style = parsed_style;
+                            pos = escape_chars_end + 1;
                         }
                     }
                 }
@@ -98,11 +99,11 @@ exports.parse_console_input = function (input, pos) {
                 output.pop();
                 break;
             default:
-                console.log("Unimplemented escape code:" + char);
+                console.log("Unimplemented escape code:" + input[pos]);
             }
         }
         // `concat` over `join`: https://stackoverflow.com/a/27126355/1291435
-        buffer += char;
+        buffer += input[pos];
         pos++;
     }
     output.push({ "value": buffer, "style": current_style });
