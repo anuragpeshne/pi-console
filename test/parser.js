@@ -67,5 +67,15 @@ describe('Parser', function() {
             assert.equal(part1.value, input_1 + input_2);
             assert.equal(part1.style.fg, "red");
         });
+
+        it('should parse newline', function() {
+            var input_part1 = "part1";
+            var input_part2 = "part2";
+            var input_str = input_part1 + "\n" + ESC + "[31m" + input_part2 + ESC + "[0m";
+
+            var parsed = parser.parse_console_input(input_str);
+            assert.equal(parsed.length, 3);
+            assert.equal(parsed[1].value, "\n");
+        });
     });
 });

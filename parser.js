@@ -101,12 +101,20 @@ exports.parse_console_input = function (input, pos) {
             default:
                 console.log("Unimplemented escape code:" + input[pos]);
             }
+        } else if (input[pos] == '\n'){
+            pos++;
+            output.push({ "value": buffer, "style": current_style});
+            buffer = '';
+            output.push({ "value": "\n" });
+        } else {
+            // `concat` over `join`: https://stackoverflow.com/a/27126355/1291435
+            buffer += input[pos];
+            pos++;
         }
-        // `concat` over `join`: https://stackoverflow.com/a/27126355/1291435
-        buffer += input[pos];
-        pos++;
     }
-    output.push({ "value": buffer, "style": current_style });
+    if (buffer.length > 0) {
+        output.push({ "value": buffer, "style": current_style });
+    }
     return output;
 };
 
@@ -138,6 +146,14 @@ exports.parse_escape_code = function (input) {
 
     return parsed_codes;
 };
+
+function to_HTML(json_code) {
+    var HTML_lines = [];
+    for (var i = 0; i < json_code.length; i++) {
+        var json_line = json_code[i];
+
+    }
+}
 
 function get_256_color_code(input_colorId) {
     if (input_colorId >= 0 && input_colorId <= 255) {
