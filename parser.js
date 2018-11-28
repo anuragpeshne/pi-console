@@ -147,13 +147,35 @@ exports.parse_escape_code = function (input) {
     return parsed_codes;
 };
 
-function to_HTML(json_code) {
+exports.to_HTML = function (json_code) {
     var HTML_lines = [];
     for (var i = 0; i < json_code.length; i++) {
         var json_line = json_code[i];
+        var span = [];
+        span.push("<span ");
+        span.push("style=\"");
+        if ('style' in json_line) {
+            if (json_line['style'] == "bold") {
+                span.push("font-weight=\"bold\";");
+            }
+            if (json_line['style'] == "underline") {
+                span.push("text-decoration=\"underline\";");
+            }
+        }
+        if ('fg' in json_line) {
+            span.push("color=\"" + json_line['fg'] + "\"" + ";");
+        }
+        if ('bg' in json_line) {
+            span.push("background-color=\"" + json_line['bg'] + "\"" + ";");
+        }
+        span.push("\">");
+        span.push(json_line.value);
+        span.push("</span>");
 
+        HTML_lines.push(span.join(""));
     }
-}
+    return HTML_lines.join("");
+};
 
 function get_256_color_code(input_colorId) {
     if (input_colorId >= 0 && input_colorId <= 255) {

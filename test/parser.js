@@ -78,4 +78,39 @@ describe('Parser', function() {
             assert.equal(parsed[1].value, "\n");
         });
     });
+
+    describe('#to_HTML(json_code)', function() {
+        var span_style_regex = /span style="(.*?)"/g; // non greedy
+        var span_content = /span .*>(.*?)<\/span>/g;
+        var ESC = "\u001b";
+
+        it('should convert empty json array', function() {
+            var empty_input = "";
+            var parsed_input = parser.parse_console_input(empty_input);
+            var actual_html = parser.to_HTML(parsed_input);
+            assert.equal(actual_html.length, 0);
+        });
+
+        it('should convert simple string', function() {
+            var input = "Hello World";
+            var parsed_input = parser.parse_console_input(input);
+            var parsed_html = parser.to_HTML(parsed_input);
+
+            var parsed_style = span_style_regex.exec(parsed_html);
+            assert.equal(parsed_style[1], "");
+
+            var parsed_content = span_content.exec(parsed_html);
+            assert.equal(parsed_content[1], input);
+        });
+
+        it('should parsed string with escape codes', function() {
+            var input_1 = "hello";
+            var input_2 = " world";
+            var input_str = ESC + "[31m" + input_1 + ESC + "[0m" + input_2;
+            var parsed = parser.parse_console_input(input_str);
+            var html = parser.to_HTML(parsed);
+            console.log(parsed);
+            console.log(html);
+        });
+    });
 });
