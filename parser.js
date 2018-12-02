@@ -152,27 +152,31 @@ exports.to_HTML = function (json_code) {
     for (var i = 0; i < json_code.length; i++) {
         var json_line = json_code[i];
         var span = [];
-        span.push("<span ");
-        span.push("style=\"");
-        if ('style' in json_line) {
-            if (json_line['style'] == "bold") {
-                span.push("font-weight=\"bold\";");
+        if (json_line['value'] == '\n') {
+            HTML_lines.push("<br/>");
+        } else {
+            span.push("<span ");
+            span.push("style=\"");
+            if ('style' in json_line) {
+                if (json_line['style'] == "bold") {
+                    span.push("font-weight:\"bold\";");
+                }
+                if (json_line['style'] == "underline") {
+                    span.push("text-decoration:\"underline\";");
+                }
+                if ('fg' in json_line['style']) {
+                    span.push("color:'" + json_line['style']['fg'] + "'" + ";");
+                }
+                if ('bg' in json_line['style']) {
+                    span.push("background-color:\"" + json_line['style']['bg'] + "\"" + ";");
+                }
             }
-            if (json_line['style'] == "underline") {
-                span.push("text-decoration=\"underline\";");
-            }
-        }
-        if ('fg' in json_line) {
-            span.push("color=\"" + json_line['fg'] + "\"" + ";");
-        }
-        if ('bg' in json_line) {
-            span.push("background-color=\"" + json_line['bg'] + "\"" + ";");
-        }
-        span.push("\">");
-        span.push(json_line.value);
-        span.push("</span>");
+            span.push("\">");
+            span.push(json_line.value);
+            span.push("</span>");
 
-        HTML_lines.push(span.join(""));
+            HTML_lines.push(span.join(""));
+        }
     }
     return HTML_lines.join("");
 };

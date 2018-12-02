@@ -80,7 +80,7 @@ describe('Parser', function() {
     });
 
     describe('#to_HTML(json_code)', function() {
-        var span_style_regex = /span style="(.*?)"/g; // non greedy
+        var span_style_regex = /span style="([aA-zZ\-:';]*?)"/g; // non greedy
         var span_content = /span .*>(.*?)<\/span>/g;
         var ESC = "\u001b";
 
@@ -96,6 +96,7 @@ describe('Parser', function() {
             var parsed_input = parser.parse_console_input(input);
             var parsed_html = parser.to_HTML(parsed_input);
 
+            span_style_regex.lastIndex = 0;
             var parsed_style = span_style_regex.exec(parsed_html);
             assert.equal(parsed_style[1], "");
 
@@ -109,8 +110,23 @@ describe('Parser', function() {
             var input_str = ESC + "[31m" + input_1 + ESC + "[0m" + input_2;
             var parsed = parser.parse_console_input(input_str);
             var html = parser.to_HTML(parsed);
-            console.log(parsed);
-            console.log(html);
+
+            span_style_regex.lastIndex = 0;
+            var parsed_style1 = span_style_regex.exec(html);
+            assert.equal(parsed_style1[1], "color:'red';");
+
+            var parsed_style2 = span_style_regex.exec(html);
+            assert.equal(parsed_style2[1], "");
+        });
+
+        it('should parse newline', function() {
+            var input_part1 = "part1";
+            var input_part2 = "part2";
+            var input_str = input_part1 + "\n" + ESC + "[31m" + input_part2 + ESC + "[0m";
+
+            var parsed = parser.parse_console_input(input_str);
+            var html = parser.to_HTML(parsed);
+            assert.equal((html.indexOf('<br/>') != -1), true);
         });
     });
 });
