@@ -1,6 +1,17 @@
 // referred: https://misc.flogisoft.com/bash/tip_colors_and_formatting
 
-const CONTROL_SEQ_256_LIST = require('./xtermcolors.json');
+if (typeof exports === "undefined"){
+    exports = {};
+}
+
+var CONTROL_SEQ_256_LIST = {};
+if (typeof require === "function") {
+    CONTROL_SEQ_256_LIST = require('./xtermcolors.json');
+} else {
+    fetch("xtermcolors.json")
+        .then(response => response.json())
+        .then(json => CONTROL_SEQ_256_LIST = json);
+}
 
 const ESCAPE_CODES = {
     "\u0008": "backspace",
@@ -66,8 +77,8 @@ function parse_8_16_control_seq(code) {
     return null;
 }
 
-exports.parse_console_input = function (input, pos) {
-    var pos = (typeof(pos) !== 'undefined') ? pos : 0;
+function parse_console_input (input, pos) {
+    pos = (typeof(pos) !== 'undefined') ? pos : 0;
     var output = [];
     var current_style = {};
     var buffer = '';
@@ -84,7 +95,7 @@ exports.parse_console_input = function (input, pos) {
                             escape_chars_end++;
                         }
                         if (escape_chars_end < input.length) {
-                            var parsed_style = exports.parse_escape_code(input.substring(pos, escape_chars_end));
+                            var parsed_style = parse_escape_code(input.substring(pos, escape_chars_end));
                             if (buffer.length > 0) {
                                 output.push({ "value": buffer, "style": current_style });
                                 buffer = '';
@@ -117,8 +128,9 @@ exports.parse_console_input = function (input, pos) {
     }
     return output;
 };
+exports.parse_console_input = parse_console_input;
 
-exports.parse_escape_code = function (input) {
+function parse_escape_code (input) {
     var control_seq = input.split(';').map(function(e) { return parseInt(e); });
     if (control_seq.length == 3) {
         if (control_seq[0] == 38 && control_seq[1] == 5) {
@@ -146,40 +158,7 @@ exports.parse_escape_code = function (input) {
 
     return parsed_codes;
 };
-
-exports.to_HTML = function (json_code) {
-    var HTML_lines = [];
-    for (var i = 0; i < json_code.length; i++) {
-        var json_line = json_code[i];
-        var span = [];
-        if (json_line['value'] == '\n') {
-            HTML_lines.push("<br/>");
-        } else {
-            span.push("<span ");
-            span.push("style=\"");
-            if ('style' in json_line) {
-                if (json_line['style'] == "bold") {
-                    span.push("font-weight:\"bold\";");
-                }
-                if (json_line['style'] == "underline") {
-                    span.push("text-decoration:\"underline\";");
-                }
-                if ('fg' in json_line['style']) {
-                    span.push("color:'" + json_line['style']['fg'] + "'" + ";");
-                }
-                if ('bg' in json_line['style']) {
-                    span.push("background-color:\"" + json_line['style']['bg'] + "\"" + ";");
-                }
-            }
-            span.push("\">");
-            span.push(json_line.value);
-            span.push("</span>");
-
-            HTML_lines.push(span.join(""));
-        }
-    }
-    return HTML_lines.join("");
-};
+exports.parse_escape_code = parse_escape_code;
 
 function get_256_color_code(input_colorId) {
     if (input_colorId >= 0 && input_colorId <= 255) {

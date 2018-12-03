@@ -3,18 +3,48 @@
     <head>
         <title>Web Socket Example</title>
         <meta charset="UTF-8">
-        <script>
+        <script src="./parser.js" type="text/javascript"></script>
+        <script type="text/javascript">
+
          function handle_incoming(data) {
              var regex = /([\x00-\x1F])/g;
              console.log(regex.exec(data));
-             datalines = data.replace(' ', '&nbsp;').split("\n");
-             for (lineindex in datalines) {
-               var newdiv = document.createElement("div");
-               newdiv.innerHTML = datalines[lineindex];
-               newdiv.classList.add('line');
-               var consoleDiv = document.getElementById('console');
-               consoleDiv.appendChild(newdiv);
+             var parsed_json = parse_console_input(data);
+             var parsed_html = to_HTML(parsed_json);
+             var console_div = document.getElementById('console');
+             console_div.appendChild(parsed_html);
+             console_div.scrollTop = console_div.scrollHeight;
+         }
+
+         function to_HTML (json_code) {
+             var main_div = document.createElement("div");
+             for (var i = 0; i < json_code.length; i++) {
+                 var json_line = json_code[i];
+                 var span = [];
+                 if (json_line['value'] == '\n') {
+                     main_div.appendChild(document.createElement("br"));
+                 } else {
+                     var span = document.createElement("span");
+                     if ('style' in json_line) {
+                         if (json_line['style'] == "bold") {
+                             span.style["font-weight"] = "bold";
+                         }
+                         if (json_line['style'] == "underline") {
+                             span.style["text-decoration"] = "underline";
+                         }
+                         if ('fg' in json_line['style']) {
+                             span.style["color"] = json_line['style']['fg'];
+                         }
+                         if ('bg' in json_line['style']) {
+                             span.style["background-color"] = json_line['style']['bg'];
+                         }
+                     }
+                     span.innerHTML = json_line.value;
+
+                     main_div.appendChild(span);
+                 }
              }
+             return main_div;
          }
 
          var reader = new FileReader();
@@ -44,6 +74,7 @@
              margin: 0 auto;
              max-width: 800ex;
              padding: 5%;
+             white-space: pre;
          }
         </style>
     </head>
